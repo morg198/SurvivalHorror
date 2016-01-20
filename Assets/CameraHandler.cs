@@ -2,28 +2,23 @@
 using System.Collections;
 
 public class CameraHandler : MonoBehaviour {
-    public enum RotationAxes {MouseXAndY = 0, MouseX = 1, MouseY = 2 }
-    public RotationAxes axes = RotationAxes.MouseXAndY;
+ 
 
     public float mouseLookSpeedX = 3;
     public float mouseLookSpeedY= 0.05f;
 
-    public float zoomAmount = 50;
+    public bool zoomToggle = false;
 
     Camera cam;
 
     float xRotation = 0;
     float camYDis= 0;
 
-    public bool toggleZoom = true;
 
-    Quaternion originalRotation;
-    Vector3 originalPos;
-    Quaternion originalCharRotation;
+    Vector3 offset;
+    Quaternion rotOffset;
 
-
-    bool lookBack = false;
-    bool zoomedIn = false;
+    bool zoom = false;
 
     //Function to be used to limit the angle you can look
     public static float ClampAngle(float angle, float min, float max)
@@ -40,103 +35,12 @@ public class CameraHandler : MonoBehaviour {
     void Awake()
     {
         cam = Camera.main;
-        originalRotation = cam.transform.localRotation;
-        originalPos = cam.transform.localPosition;
-        originalCharRotation = transform.localRotation;
+        offset = cam.transform.localPosition;
+        rotOffset = cam.transform.localRotation;
     }
 	
 	void LateUpdate () {
-        /*
-
-        if (!lookBack)
-        {
-
-            //Looks up and down and turns left and right
-            if (axes == RotationAxes.MouseXAndY)
-            {
-                yRotation += Input.GetAxis("Mouse Y") * mouseLookSpeed;
-                yRotation = ClampAngle(yRotation, -vertDownDegrees, vertUpDegrees);
-
-                xRotation += Input.GetAxis("Mouse X") * mouseLookSpeed;
-                xRotation = ClampAngle(xRotation, -360, 360);
-
-                Quaternion yQuaternion = Quaternion.AngleAxis(-yRotation, Vector3.right);
-                Quaternion xQuaternion = Quaternion.AngleAxis(xRotation, Vector3.up);
-                cam.transform.localRotation = originalRotation * yQuaternion;
-                transform.localRotation = originalCharRotation * xQuaternion;
-
-            }
-
-
-            //Turns left and right
-            else if (axes == RotationAxes.MouseX)
-            {
-
-                xRotation += Input.GetAxis("Mouse X") * mouseLookSpeed;
-                xRotation = ClampAngle(xRotation, -360, 360);
-                Quaternion xQuaternion = Quaternion.AngleAxis(xRotation, Vector3.up);
-                transform.localRotation = originalCharRotation * xQuaternion;
-            }
-        }
-      
-        
-
-        //Look Back Control
-        if (Input.GetButtonDown("LookBack"))
-        {
-            if(lookBack == false)
-            {
-                
-                lookBack = true;
-            }
-        }
-        if(Input.GetButtonUp("LookBack"))
-        {
-            if(lookBack == true)
-            {
-                lookBack = false;
-            }   
-        }
-
-        if(lookBack == true)
-        {
-            cam.transform.localRotation = new Quaternion(0, 180 , 0, cam.transform.localRotation.w);  
-        }
-
-        //Zoom Control
-
-        //Check if zoom is toggle or not
-        if(toggleZoom)
-        {
-            if (Input.GetButtonDown("ToggleZoom"))
-            {
-                zoomedIn = !zoomedIn;
-            }
-        }
-        else
-        {
-            if (Input.GetMouseButtonDown(1))
-            {
-                zoomedIn = true;
-            }
-            if (Input.GetMouseButtonUp(1))
-            {
-                zoomedIn = false;
-            }
-        }
        
-
-
-
-        if (zoomedIn)
-        {
-            cam.fieldOfView = zoomAmount;
-        }
-        if(!zoomedIn)
-        {
-            cam.fieldOfView = 60;
-        }
-        */
 
 
 
@@ -144,13 +48,16 @@ public class CameraHandler : MonoBehaviour {
        
             camYDis = Input.GetAxis("Mouse Y") * mouseLookSpeedY;
             xRotation = Input.GetAxis("Mouse X") * mouseLookSpeedX;
-
-            cam.transform.Translate(0, camYDis, 0);
+            
+            if(!zoom)
+            {
+                cam.transform.Translate(0, camYDis, 0);
+            }
+           
             transform.Rotate(0, xRotation, 0);
 
-           
 
-             if (cam.transform.localPosition.y < -0.5)
+            if (cam.transform.localPosition.y < -0.5)
             {
                 cam.transform.localPosition = new Vector3(cam.transform.localPosition.x, -0.5f, cam.transform.localPosition.z);
             }
@@ -168,8 +75,56 @@ public class CameraHandler : MonoBehaviour {
 
 
 
+            //Zoom control
+            if (zoomToggle)
+            {
+                if (Input.GetButtonDown("ToggleZoom"))
+                {
+                    if (zoom)
+                    {
+                        zoom = false;
+                        cam.transform.localPosition = offset;
+                        
+                     }
+                    else
+                    {
+                        zoom = true;
+                    cam.transform.localRotation = rotOffset;
+                }
+                }
+            }
+            else
+            {
+                if (Input.GetMouseButtonDown(1))
+                {
+                    if(!zoom)
+                    {
+                        zoom = true;
+                    cam.transform.localRotation = rotOffset;
+                }
+                }
+                if(Input.GetMouseButtonUp(1))
+                {
+                    if (zoom)
+                    {
+                        zoom = false;
+                        cam.transform.localPosition = offset;
+                     cam.transform.localRotation = rotOffset;
+                }
+            }
+            }
 
-        cam.transform.LookAt(transform);
+            if(zoom)
+            {
+                cam.transform.localPosition = Vector3.Slerp(cam.transform.localPosition, new Vector3(0.7f, 0.9f, -1.17f), 0.1f);
+                cam.transform.localRotation.eulerAngles.Set(26.8f, 0, 0);
+            }
+            else
+            {
+                cam.transform.LookAt(transform);
+            }
+
+        
         
 
     }
