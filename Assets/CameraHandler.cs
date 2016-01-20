@@ -5,22 +5,20 @@ public class CameraHandler : MonoBehaviour {
     public enum RotationAxes {MouseXAndY = 0, MouseX = 1, MouseY = 2 }
     public RotationAxes axes = RotationAxes.MouseXAndY;
 
-    public float mouseLookSpeed = 5;
+    public float mouseLookSpeedX = 3;
+    public float mouseLookSpeedY= 0.05f;
 
     public float zoomAmount = 50;
 
     Camera cam;
 
     float xRotation = 0;
-    float yRotation = 0;
-
-    public int horizLookDegrees = 90;
-    public int vertUpDegrees = 80;
-    public int vertDownDegrees = 45;
+    float camYDis= 0;
 
     public bool toggleZoom = true;
 
     Quaternion originalRotation;
+    Vector3 originalPos;
     Quaternion originalCharRotation;
 
 
@@ -37,19 +35,18 @@ public class CameraHandler : MonoBehaviour {
         return Mathf.Clamp(angle, min, max);
     }
 
-    // Use this for initialization
-    void Start () {
-	
-	}
+
 	
     void Awake()
     {
         cam = Camera.main;
         originalRotation = cam.transform.localRotation;
+        originalPos = cam.transform.localPosition;
         originalCharRotation = transform.localRotation;
     }
-	// Update is called once per frame
-	void Update () {
+	
+	void LateUpdate () {
+        /*
 
         if (!lookBack)
         {
@@ -139,6 +136,41 @@ public class CameraHandler : MonoBehaviour {
         {
             cam.fieldOfView = 60;
         }
+        */
+
+
+
+        //Looks up and down and turns left and right
+       
+            camYDis = Input.GetAxis("Mouse Y") * mouseLookSpeedY;
+            xRotation = Input.GetAxis("Mouse X") * mouseLookSpeedX;
+
+            cam.transform.Translate(0, camYDis, 0);
+            transform.Rotate(0, xRotation, 0);
+
+           
+
+             if (cam.transform.localPosition.y < -0.5)
+            {
+                cam.transform.localPosition = new Vector3(cam.transform.localPosition.x, -0.5f, cam.transform.localPosition.z);
+            }
+
+            if (cam.transform.localPosition.y > 2.5)
+            {
+                cam.transform.localPosition = new Vector3(cam.transform.localPosition.x, 2.5f, cam.transform.localPosition.z);
+            }
+
+          
+            if(cam.transform.localPosition.z != -2)
+            {
+                cam.transform.localPosition = new Vector3(cam.transform.localPosition.x, cam.transform.localPosition.y, -2);
+            }
+
+
+
+
+        cam.transform.LookAt(transform);
         
+
     }
 }
