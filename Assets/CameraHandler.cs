@@ -80,6 +80,7 @@ public class CameraHandler : MonoBehaviour {
             {
                 if (Input.GetButtonDown("ToggleZoom"))
                 {
+                    
                     if (zoom)
                     {
                         zoom = false;
@@ -88,9 +89,10 @@ public class CameraHandler : MonoBehaviour {
                      }
                     else
                     {
+                        offset = cam.transform.localPosition;
                         zoom = true;
-                    cam.transform.localRotation = rotOffset;
-                }
+                        cam.transform.localRotation = rotOffset;
+                    }
                 }
             }
             else
@@ -99,9 +101,10 @@ public class CameraHandler : MonoBehaviour {
                 {
                     if(!zoom)
                     {
+                        offset = cam.transform.localPosition;
                         zoom = true;
-                    cam.transform.localRotation = rotOffset;
-                }
+                        cam.transform.localRotation = rotOffset;
+                    }
                 }
                 if(Input.GetMouseButtonUp(1))
                 {
